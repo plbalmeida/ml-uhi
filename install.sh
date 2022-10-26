@@ -3,7 +3,8 @@ sudo apt install python3-virtualenv;
 virtualenv -p python3 venv;
 . venv/bin/activate;
 
-# installing pre-commit to update requirements.txt file automatically 
+# installing pre-commit to update requirements.txt file automatically
+pip3 install requirements.txt; 
 pip3 install pre-commit;
 pre-commit install;
 
