@@ -4,7 +4,6 @@ virtualenv -p python3 venv;
 . venv/bin/activate;
 
 # installing pre-commit to update requirements.txt file automatically
-pip3 install -r requirements.txt; 
 pip3 install pre-commit;
 pre-commit install;
 
