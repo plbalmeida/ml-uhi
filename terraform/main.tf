@@ -96,10 +96,6 @@ resource "aws_instance" "ml_server" {
     tags = {
         Name = "MLServerInstance"
     }
-
-    depends_on = [
-        aws_s3_bucket.cge2009to2019
-    ]
 }
 
 resource "aws_eip" "eip" {
@@ -114,19 +110,4 @@ resource "aws_eip_association" "eip_assoc" {
 resource "aws_key_pair" "key-pair" {
     key_name = "key-pair"
     public_key = "${file("~/.ssh/key-pair.pub")}"
-}
-
-
-// S3
-resource "aws_s3_bucket" "cge2009to2019" {
-    bucket = "cge"
-
-    tags = {
-        Name = "cge"
-    }
-}
-
-resource "aws_s3_bucket_acl" "cge2009to2019acl" {
-  bucket = aws_s3_bucket.cge2009to2019.id
-  acl = "private"
 }
