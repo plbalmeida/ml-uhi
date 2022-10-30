@@ -108,6 +108,6 @@ resource "aws_eip_association" "eip_assoc" {
 }
 
 resource "aws_key_pair" "key-pair" {
-    key_name = "key-pair"
-    public_key = "${file("~/.ssh/key-pair.pub")}"
+    key_name = "ec2-key-pair"
+    public_key = "${file("~/.ssh/ec2-key-pair.pub")}"
 }
