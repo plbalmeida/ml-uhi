@@ -6,6 +6,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import cross_val_score, TimeSeriesSplit
+from sklearn.multioutput import RegressorChain
 from hyperopt import hp, fmin, tpe, rand, STATUS_OK, Trials, space_eval
 import pickle
 
@@ -82,7 +83,7 @@ class RidgeHyperoptTS(Trainer):
                     MSE score.
                 '''
 
-                model = Ridge(**params, random_state=123)   
+                model = RegressorChain(Ridge(**params, random_state=123), random_state=123)   
 
                 score = np.sqrt(-cross_val_score(
                     model, 
@@ -106,14 +107,14 @@ class RidgeHyperoptTS(Trainer):
                 algo=tpe.suggest, 
                 max_evals=3, 
                 trials=Trials(),
-                rstate=np.random.RandomState(0)
+                rstate=np.random.default_rng(0)
                 )
 
             return space_eval(parameters, best)
 
         best_hp = rd_hyperopt(X, y)
 
-        rd = Ridge(**best_hp, random_state=123)  
+        rd = RegressorChain(Ridge(**best_hp, random_state=123), random_state=123)  
         rd.fit(X, y)
 
         with open(save_path, 'wb') as f:

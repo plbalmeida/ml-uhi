@@ -6,6 +6,7 @@ venv/
 **/__pycache__
 **/*.ipynb_checkpoints/
 credentials.json
+data/*
 
 ### Terraform ###
 # Local .terraform directories
