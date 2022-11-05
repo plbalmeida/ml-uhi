@@ -83,7 +83,7 @@ class RidgeHyperoptTS(Trainer):
                     MSE score.
                 '''
 
-                model = RegressorChain(Ridge(**params, random_state=123), random_state=123)   
+                model = RegressorChain(Ridge(**params, random_state=123), random_state=123)
 
                 score = np.sqrt(-cross_val_score(
                     model, 
@@ -107,14 +107,14 @@ class RidgeHyperoptTS(Trainer):
                 algo=tpe.suggest, 
                 max_evals=3, 
                 trials=Trials(),
-                rstate=np.random.default_rng(0)
+                rstate=np.random.default_rng(123)
                 )
 
             return space_eval(parameters, best)
 
         best_hp = rd_hyperopt(X, y)
 
-        rd = RegressorChain(Ridge(**best_hp, random_state=123), random_state=123)  
+        rd = RegressorChain(Ridge(**best_hp, random_state=123), random_state=123)
         rd.fit(X, y)
 
         with open(save_path, 'wb') as f:
@@ -207,12 +207,15 @@ class GBHyperoptTS(Trainer):
                     'min_samples_leaf': int(params['min_samples_leaf'])
                     }
 
-                model = HistGradientBoostingRegressor(
-                    **params,
-                    warm_start=True,
-                    early_stopping=True,
+                model = RegressorChain(
+                    HistGradientBoostingRegressor(
+                        **params,
+                        warm_start=True,
+                        early_stopping=True,
+                        random_state=123
+                        ), 
                     random_state=123
-                    )   
+                )   
 
                 score = np.sqrt(-cross_val_score(
                     model, 
@@ -239,7 +242,7 @@ class GBHyperoptTS(Trainer):
                 algo=tpe.suggest, 
                 max_evals=3, 
                 trials=Trials(),
-                rstate=np.random.RandomState(0)
+                rstate=np.random.default_rng(123)
                 )
 
             return space_eval(parameters, best)
@@ -253,12 +256,15 @@ class GBHyperoptTS(Trainer):
             'min_samples_leaf': int(best_hp['min_samples_leaf'])
             }
 
-        gb = HistGradientBoostingRegressor(
-            **best_hp,
-            warm_start=True,
-            early_stopping=True,
+        gb = RegressorChain(
+            HistGradientBoostingRegressor(
+                **best_hp,
+                warm_start=True,
+                early_stopping=True,
+                random_state=123
+                ), 
             random_state=123
-            )
+        )
             
         gb.fit(X, y)
 
