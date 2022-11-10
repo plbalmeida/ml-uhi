@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error
 from abc import ABC, abstractmethod
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, QuantileRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.neighbors import KNeighborsRegressor
@@ -554,3 +554,132 @@ class KNNHyperoptTS(Trainer):
         prediction = model.predict(future)
 
         return list(prediction)
+
+
+class QRHyperoptTS(Trainer):
+    '''
+    Training quantile regressor model for time series forecasting with 
+    Bayesian hyperparameter optimization.
+    '''
+
+    def __init__(self):
+        pass
+
+    def fit(self, X, y, n_splits=3, max_train_size=None, test_size=None, save_path='qr.pkl'):
+        '''
+        Define basic training structure.
+
+        Parameters
+        ----------
+        X : pandas data frame
+            Data frame with predictor features.
+        y : pandas series
+            Pandas series with target data.
+        n_splits : int
+            Number of cross-validation folds. 
+        test_size : int
+            Size of forecasting horizon.
+        '''
+
+        def qr_hyperopt(X, y, verbose=False, persistIterations=True):
+            '''
+            Bayesian hyperparameter optimization with Hyperopt.
+            
+            Parameters
+            ----------
+            X : pandas data frame
+                Data frame with predictor features.
+            y : pandas series
+                Pandas series with target data.
+            
+            Returns
+            -------
+            space_eval(parameters, best) : dict
+                Best hyperparameters. 
+            '''
+
+            def objective(params):
+                '''
+                Function to minimize RMSE score.
+                
+                Paramenters
+                -----------
+                params : python dict
+                    Hyperparamenter space to check MSE score.
+
+                Returns
+                -------
+                score : float   
+                    MSE score.
+                '''
+
+                params = {
+                    'alpha': params['alpha'],
+                    'solver': params['solver']
+                }
+
+                model = QuantileRegressor(**params)   
+
+                score = np.sqrt(-cross_val_score(
+                    model, 
+                    X, 
+                    y, 
+                    cv=TimeSeriesSplit(n_splits=n_splits, max_train_size=max_train_size, test_size=test_size), 
+                    scoring='neg_mean_squared_error', 
+                    verbose=False, 
+                    n_jobs=-1
+                    ).mean())
+
+                return {'loss': score, 'status': STATUS_OK}
+
+            parameters = {
+                'alpha': hp.loguniform('alpha', -3, 1),
+                'solver': hp.choice('solver', ["highs-ds", "highs-ipm", "highs", "interior-point", "revised simplex"])
+            }
+
+            best = fmin(
+                objective, 
+                space=parameters, 
+                algo=tpe.suggest, 
+                max_evals=3, 
+                trials=Trials(),
+                rstate=np.random.default_rng(123)
+                )
+
+            return space_eval(parameters, best)
+
+        best_hp = qr_hyperopt(X, y)
+
+        best_hp = {
+            'alpha': best_hp['alpha'],
+            'solver': best_hp['solver']
+            }
+
+        qr = QuantileRegressor(**best_hp)  
+        qr.fit(X, y)
+
+        with open(save_path, 'wb') as f:
+            pickle.dump(qr, f)
+
+    def predict(self, future, save_path='qr.pkl'):
+        '''
+        Define basic prediction structure.
+        
+        Parameters
+        ----------
+        future : pandas data frame 
+            Data frame with predictor features.
+        
+        Returns
+        -------
+        list(prediction) : list
+            List with predictions.
+        '''
+
+        with open(save_path, 'rb') as f:
+            model = pickle.load(f)
+
+        prediction = model.predict(future)
+
+        return list(prediction)
+
