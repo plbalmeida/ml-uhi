@@ -23,12 +23,12 @@ def resample_data(df : pd.DataFrame) -> pd.DataFrame:
 
     posto = df.station.unique()[0]
     posto_nome = df.station_name.unique()[0]
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df = df.sort_values('timestamp')
-    df = df.set_index('timestamp')
-    df = df.resample(rule='60min').mean()
-    df['station'] = posto
-    df['station_name'] = posto_nome
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df = df.sort_values("timestamp")
+    df = df.set_index("timestamp")
+    df = df.resample(rule="60min").mean()
+    df["station"] = posto
+    df["station_name"] = posto_nome
     return df
 
 
