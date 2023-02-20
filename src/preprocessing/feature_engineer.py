@@ -79,7 +79,7 @@ def feature_engineer(
     features : list,
     lags : int,
     window : int
-    ):
+    ) -> pd.DataFrame:
     """
     Get wind components from wind velocity and wind direction.
     
