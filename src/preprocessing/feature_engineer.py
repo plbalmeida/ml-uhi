@@ -120,7 +120,8 @@ def feature_engineer(
     lagf = LagFeatures(
         variables=features, 
         freq=[f"{i}H" for i in range(1, lags+1)],
-        missing_values="ignore"
+        missing_values="ignore",
+        drop_original=False
     )
 
     winf = WindowFeatures(
@@ -128,7 +129,8 @@ def feature_engineer(
         window=[f"{i}H" for i in range(1, window+1)],
         freq="1H",
         functions=["mean", "std", "min", "max"],
-        missing_values="ignore"
+        missing_values="ignore",
+        drop_original=False
     )
 
     pipeline = Pipeline(
