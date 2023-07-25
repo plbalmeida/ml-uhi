@@ -81,10 +81,10 @@ resource "aws_security_group" "ssh-allowed" {
 // EC2
 resource "aws_instance" "ml_server" {
     ami = "ami-08c40ec9ead489470"
-    instance_type = "m5.2xlarge"
+    instance_type = "m5.4xlarge"
     subnet_id = "${aws_subnet.subnet-public.id}"
     vpc_security_group_ids = ["${aws_security_group.ssh-allowed.id}"]
-    key_name = "${aws_key_pair.key-pair.id}"
+    key_name = "ec2-key-pair"
     user_data = <<-EOF
         #!/bin/bash
         sudo apt update
@@ -92,22 +92,20 @@ resource "aws_instance" "ml_server" {
         sudo apt install python3-pip
         sudo apt install git
     EOF
-       
+    associate_public_ip_address = true  // associar um endereço IP público
+
     tags = {
         Name = "MLServerInstance"
     }
 }
 
-resource "aws_eip" "eip" {
-    vpc = true
+// EIP existente
+data "aws_eip" "existing" {
+  id = "eipalloc-0279c9c0c4b1886a3"  // substitua pelo seu EIP ID
 }
 
+// Associa o EIP existente à instância EC2
 resource "aws_eip_association" "eip_assoc" {
-    instance_id   = aws_instance.ml_server.id
-    allocation_id = aws_eip.eip.id
-}
-
-resource "aws_key_pair" "key-pair" {
-    key_name = "ec2-key-pair"
-    public_key = "${file("~/.ssh/ec2-key-pair.pub")}"
+  instance_id = "${aws_instance.ml_server.id}"
+  allocation_id = "${data.aws_eip.existing.id}"
 }
