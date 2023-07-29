@@ -84,7 +84,7 @@ resource "aws_instance" "ml_server" {
     instance_type = "m5.4xlarge"
     subnet_id = "${aws_subnet.subnet-public.id}"
     vpc_security_group_ids = ["${aws_security_group.ssh-allowed.id}"]
-    key_name = "ec2-key-pair"
+    key_name = aws_key_pair.deployer.key_name
     user_data = <<-EOF
         #!/bin/bash
         sudo apt update
@@ -108,4 +108,10 @@ data "aws_eip" "existing" {
 resource "aws_eip_association" "eip_assoc" {
   instance_id = "${aws_instance.ml_server.id}"
   allocation_id = "${data.aws_eip.existing.id}"
+}
+
+// Associa o par de chaves existente à instância EC2
+resource "aws_key_pair" "deployer" {
+  key_name   = "ec2-key-pair"
+  public_key = file("~/.ssh/ec2-key-pair.pub")
 }
