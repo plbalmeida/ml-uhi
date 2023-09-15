@@ -81,7 +81,8 @@ resource "aws_security_group" "ssh-allowed" {
 // EC2
 resource "aws_instance" "ml_server" {
     ami = "ami-08c40ec9ead489470"
-    instance_type = "m5.4xlarge"
+    # instance_type = "m5.4xlarge"
+    instance_type = "c5.24xlarge"
     subnet_id = "${aws_subnet.subnet-public.id}"
     vpc_security_group_ids = ["${aws_security_group.ssh-allowed.id}"]
     key_name = aws_key_pair.deployer.key_name
