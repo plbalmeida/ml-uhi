@@ -65,8 +65,8 @@ def get_wind_components(
     # convert to radians
     wd_rad = df[wind_direction] * np.pi / 180
     # calculate the wind x and y components
-    df[x_name] = wv * np.cos(wd_rad)
-    df[y_name] = wv * np.sin(wd_rad)
+    df[x_name] = -wv * np.sin(wd_rad)
+    df[y_name] = -wv * np.cos(wd_rad)
     return df
 
 
